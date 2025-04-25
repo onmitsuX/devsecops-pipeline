@@ -1,0 +1,28 @@
+trigger:
+- SonarQube
+
+variables:
+- group: SonarQubeVars
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+
+- script: |
+    pip install -r app/requirements.txt
+  displayName: 'Install Python Dependencies'
+
+- script: |
+    wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+    unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+    export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin
+    sonar-scanner \
+      -Dsonar.projectKey=SonarQube-Security-Testing \
+      -Dsonar.sources=app \
+      -Dsonar.host.url=https://sonarqube.cccudev.org \
+      -Dsonar.token=$(SONAR_TOKEN)
+  displayName: 'Run SonarQube SAST Scan'
